@@ -38,9 +38,12 @@ def main():
 
 def read_my_file(filename):
     """
+              Reads values from first two columns in a csv file
 
-    :param filename:
-    :return: two float arrays of equal length. Indexes correspond and one array is time and one is voltage
+    :param filename: string
+                Must be the name of a csv file to read
+    :return: float array
+            two float arrays of equal length. Indexes correspond. The first array is time and second array is voltage
     """
     time = []
     voltage = []
@@ -58,11 +61,16 @@ def read_my_file(filename):
 
 def butter_lowpass(cutoff, fs, order=5):
     """
+            creates the correct coefficients to simulate a low pass filter
 
     :param cutoff: float
-    :param fs:
-    :param order:
-    :return:
+            Cutoff is the desired cutoff frequency of the low pass filter
+    :param fs: float
+            The sampling rate from the imported data, normalizes the cutoff based sampling rate.
+    :param order: integer
+           determines the number of coefficients for the filter
+    :return: floats
+           Returns the coefficients to be used in the low pass filter
     """
     nyq = 0.5 * fs
     normal_cutoff = cutoff / nyq
@@ -72,12 +80,17 @@ def butter_lowpass(cutoff, fs, order=5):
 
 def butter_lowpass_filter(data, cutoff, fs, order=5):
     """
-
-    :param data:
-    :param cutoff:
-    :param fs:
-    :param order:
-    :return:
+        Filters out frequency information above the the cutoff in the selected data
+    :param data: float array
+             Data that will filtered by the low pass filter
+    :param cutoff: float
+             Cutoff is the desired cutoff frequency of the low pass filter
+    :param fs: float
+             The sampling rate of the data to be filtered
+    :param order: integer
+             determines the number of coefficients for the filter
+    :return: float array
+            Returns the filtered data in a float array.
     """
     b, a = butter_lowpass(cutoff, fs, order=order)
     y = lfilter(b, a, data)
@@ -86,9 +99,12 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 def min_max(array):
     """
-
-    :param array:
-    :return: tuple containing min and max of the array
+        Finds the min and max values in the input array
+    :param : float array
+            Array of multiple numeric values
+    :return: tuple
+            Returns a tuple containing min and max of the array. First element of the tuple is the min and the second
+            element is the max.
     """
     extreme1 = (min(array))
     extreme2 = (max(array))
@@ -98,11 +114,15 @@ def min_max(array):
 
 def diff_signal(array1, array2):
     """
+        Takes the derivative of signal y with respect to x.
 
-
-    :param array1:
-    :param array2:
-    :return:
+    :param array1: float array
+            Float array of independent var. , the derivative is taken with respect to this var.
+    :param array2: float array
+            Float array of the dependent var. , looking at the change of this var. with respect to x
+    :return: Float Array
+            Returns a Float Array that contains the derivative of the signal. The length of the return array will be
+            N-1 (N = length of the input array).
     """
     dy = diff(array2)
     dx = diff(array1)
@@ -112,9 +132,11 @@ def diff_signal(array1, array2):
 
 def take_avg(array):
     """
-
-    :param array:
-    :return:
+        Takes the average of a numeric array
+    :param array: float array
+            Array of numeric values
+    :return: float
+            Returns a single float, that is the average of the input array
     """
     total = sum(array)
     avg = total / len(array)
@@ -123,9 +145,11 @@ def take_avg(array):
 
 def get_std(array):
     """
-
-    :param array:
-    :return:
+        Returns the standard deviation of the array
+    :param array: float array
+        Array of numeric values
+    :return: float
+        Returns a single float, that is the standard deviation of the input array
     """
     std = statistics.stdev(array)
     return std
@@ -133,11 +157,22 @@ def get_std(array):
 
 def check_for_peak(start, end, fs, threshold, array1, array2):
     """
-
-    :param threshold:
-    :param array1:
-    :param array2:
-    :return:
+        Determines the number of qs peaks within a given time frame
+    :param start: Float
+        User specfic time to start checking for peaks
+    :param end: float
+        User specfic time to stop checking for peaks
+    :param fs: float
+        Sampling rate of peak data so the time between samples can be calc.
+    :param threshold: float
+        Numeric value that the array2 value must be greater than to be considered a peak
+    :param array1: float array
+        Array of numeric values that are the times which the signal was sampled
+    :param array2: float array
+        Array of numeric values that are the value of the signal at that time
+    :return: float array, integer
+        Returns a array of the times that the peaks/ beats occur. Also returns an integer that represents the number of
+        beats in the given time frame
     """
     beat_time = []
     beat_count = 0
@@ -159,11 +194,11 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
 
 def calc_avg_heartrate(array):
     """
-
-    :param start:
-    :param end:
-    :param array:
-    :return:
+        Calcs the average heart from the array of time values where beats occur
+    :param array: float array
+        array of the times where the beats/ qs peaks occur
+    :return: float
+        Returns the average bpm of the patient during the user specifc time range
     """
     summation = 0
     count = 0
@@ -179,12 +214,18 @@ def calc_avg_heartrate(array):
 def make_dict(mean_bpm, volt_ext, duration, num_beats, beats):
     """
 
-    :param mean_bpm:
-    :param volt_ext:
-    :param duration:
-    :param num_beats:
-    :param beats:
-    :return:
+    :param mean_bpm: float
+        Average bpm of the signal over the specfic time range
+    :param volt_ext: tuple
+        Tuple of the min and max voltages in the signal
+    :param duration: float
+        Length of sample/ data strip
+    :param num_beats: integer
+        The number of beats that occur in the specfic time frame
+    :param beats: float array
+        Float array of the times that qs peaks occur
+    :return: dictionary
+        returns a dictionary of the important metrics from the signal data
     """
     dict = {
         "Mean_hr_bpm": mean_bpm,
@@ -197,7 +238,12 @@ def make_dict(mean_bpm, volt_ext, duration, num_beats, beats):
 
 
 def write_json(dict):
-    with open('data.txt', 'w') as outfile:
+    """
+        Writes the input dictionary to a text file using json
+    :param dict: dictionary
+        Dictionary with all the important metrics for the data signal. Dict is writing a file named metrics.txt
+    """
+    with open('metrics.txt', 'w') as outfile:
         json.dump(dict, outfile, indent = 2)
 
 
