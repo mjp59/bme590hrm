@@ -5,6 +5,7 @@ from scipy.signal import butter, lfilter, freqz
 from numpy import diff
 import statistics
 import json
+import sys
 
 
 def main():
@@ -22,13 +23,23 @@ def main():
     avg_slope = take_avg(slope)
     std_slope = get_std(slope)
     threshold = avg_slope + (2 * std_slope)
-    print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
+    try:
+        print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
           , ":")
-    y = input()
-    print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
+        y = input()
+        print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
           ":")
-    z = input()
-    beat_info = check_for_peak(float(y), float(z), fs, threshold, time, slope)
+        z = input()
+        if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
+            print("Error: Enter start and end values with the allowed range ")
+            sys.exit()
+        if float(z) < float(y) or float(y) > float(z):
+            print("Error: Enter an start time that is smaller than the end time or an end time that "
+                  "is greater than the start time")
+        beat_info = check_for_peak(float(y), float(z), fs, threshold, time, slope)
+    except ValueError:
+        print("Error: Enter a Numeric Value")
+        sys.exit()
     beat_time = beat_info[0]
     beat_count = beat_info[1]
     avg_bpm = calc_avg_heartrate(beat_time)
@@ -47,16 +58,19 @@ def read_my_file(filename):
     """
     time = []
     voltage = []
+    try:
+        with open(filename, encoding='utf-8-sig') as csvDataFile:
+            csvReader = csv.reader(csvDataFile)
+            for row in csvReader:
+                if row[0] != '' and float(row[0]) >= 0 and row[1] != '':
+                    time.append(float(row[0]))
+                    voltage.append(float(row[1]))
 
-    with open(filename, encoding='utf-8-sig') as csvDataFile:
-        csvReader = csv.reader(csvDataFile)
-        for row in csvReader:
-            if row[0] != '' and float(row[0]) >= 0 and row[1] != '':
-                time.append(float(row[0]))
-                voltage.append(float(row[1]))
+        return time, voltage
 
-
-    return time, voltage
+    except FileNotFoundError:
+        print("Err... File not found")
+        sys.exit()
 
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -202,6 +216,8 @@ def calc_avg_heartrate(array):
     """
     summation = 0
     count = 0
+    if len(array) == 0 or len(array == 1):
+        return "Not Enough QS Peaks in Time Range to Determine BPM"
     for x in range(len(array)):
         if x != (len(array) - 1):
             bpm = 60 / (array[x + 1] - array[x])
