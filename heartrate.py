@@ -9,8 +9,10 @@ import sys
 
 
 def main():
-    print('Enter the filename:')
-    x = input()
+    x = sys.argv[-1]
+    if x == 'heartrate.py':
+        print('Enter the filename:')
+        x = input()
     time_volt = read_my_file(x)
     time = time_volt[0]
     volt = time_volt[1]
@@ -216,7 +218,7 @@ def calc_avg_heartrate(array):
     """
     summation = 0
     count = 0
-    if len(array) == 0 or len(array == 1):
+    if len(array) == 0 or len(array) == 1:
         return "Not Enough QS Peaks in Time Range to Determine BPM"
     for x in range(len(array)):
         if x != (len(array) - 1):
