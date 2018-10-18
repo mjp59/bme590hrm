@@ -3,6 +3,7 @@ from heartrate import butter_lowpass
 from heartrate import butter_lowpass_filter
 from heartrate import min_max
 from heartrate import diff_signal
+from heartrate import take_avg
 import pytest
 import numpy as np
 
@@ -105,3 +106,16 @@ def test_diff_signal(array1, array2, expected):
     response = diff_signal(array1, array2)
     assert response[0] == expected[0]
     assert response[1] == expected[1]
+
+
+@pytest.mark.parametrize("array, expected", [
+    ([0, 1, 5], 2),
+    ([0, 2, 4], 2)
+
+
+
+])
+def test_take_avg(array, expected):
+    response = take_avg(array)
+    assert response == expected
+
