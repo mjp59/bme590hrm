@@ -24,7 +24,7 @@ def main():
     slope = diff_signal(time, filtered_volt)
     avg_slope = take_avg(slope)
     std_slope = get_std(slope)
-    threshold = avg_slope + (2 * std_slope)
+    threshold = avg_slope + (5 * std_slope)
     try:
         print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
           , ":")
@@ -201,7 +201,7 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
         if (end - (1 / fs)) <= array1[x] <= (end + (1 / fs)):
             end_index = x
     for x in range(start_index, end_index):
-        if array2[x] >= threshold and array1[x] >= (current_time + .08):
+        if abs(array2[x]) >= threshold and array1[x] >= (current_time + .08):
             current_time = array1[x]
             beat_time.append(array1[x])
             beat_count = beat_count + 1
