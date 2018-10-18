@@ -2,13 +2,14 @@ from heartrate import read_my_file
 from heartrate import butter_lowpass
 from heartrate import butter_lowpass_filter
 from heartrate import min_max
+from heartrate import diff_signal
 import pytest
 import numpy as np
 
 
 @pytest.mark.parametrize("candidate,expected", [
     ('Test.csv', ([0, 1.2, 2.4], [-.375, -.475, 4])),
-    ('what', pytest.raises(FileNotFoundError)),
+
 
 
 ])
@@ -18,14 +19,15 @@ def test_read_my_file(candidate, expected):
     assert response[1] == expected[1]
 
 
-@pytest.mark.parametrize("candidate,expected", [
-    ('what', pytest.raises(FileNotFoundError)),
+@pytest.mark.parametrize("candidate", [
+    'what',
 
 
 ])
-def test_read_my_file(candidate, expected):
-    response = read_my_file(candidate)
-    assert pytest.raises(FileNotFoundError)
+def test_read_my_file(candidate):
+    with pytest.raises(FileNotFoundError) as excinfo:
+        read_my_file(candidate)
+    assert str(excinfo.value) == 'Err... File not found'
 
 
 @pytest.mark.parametrize("cutoff, fs, order,expected", [
@@ -88,5 +90,18 @@ def test_butter_lowpass_filter(data, cutoff, fs, order, expected):
 ])
 def test_min_max(candidate, expected):
     response = min_max(candidate)
+    assert response[0] == expected[0]
+    assert response[1] == expected[1]
+
+
+@pytest.mark.parametrize("array1, array2, expected", [
+    ([0, 1, 3], [0, 1, 3], (1, 1)),
+    ([0, 2, 4], [0, 4, 8], (2, 2))
+
+
+
+])
+def test_diff_signal(array1, array2, expected):
+    response = diff_signal(array1, array2)
     assert response[0] == expected[0]
     assert response[1] == expected[1]
