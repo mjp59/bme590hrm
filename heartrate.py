@@ -1,11 +1,16 @@
+import matplotlib
 import csv
 import numpy as np
+import math
 import scipy
 from scipy.signal import butter, lfilter, freqz
 from numpy import diff
 import statistics
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
 import json
 import sys
+
 
 
 def main():
@@ -18,32 +23,55 @@ def main():
     volt = time_volt[1]
     fs = 1 / (time[1] - time[0])
     filtered_volt = butter_lowpass_filter(volt, 20.0, fs, 6)
-    ext_volt = min_max(volt)
-    ext_time = min_max(time)
-    duration = ext_time[1] - ext_time[0]
+    ext_volt = (min_stupid_method(volt), max_stupid_method(volt))
+    duration = subtract_stupid_method(min_stupid_method(time), max_stupid_method(time))
     slope = diff_signal(time, filtered_volt)
+
+    plt.plot(time, volt, 'b-', label='data')
+    plt.plot(time, filtered_volt, 'g-', linewidth=2, label='filtered data')
+    plt.xlabel('Time [sec]')
+    plt.grid()
+    plt.legend()
+
+    plt.subplots_adjust(hspace=0.35)
+    plt.show()
+
     avg_slope = take_avg(slope)
     std_slope = get_std(slope)
-    threshold = avg_slope + (5 * std_slope)
-    try:
-        print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
-          , ":")
-        y = input()
-        print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
-          ":")
-        z = input()
-        if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
-            print("Error: Enter start and end values with the allowed range ")
-            sys.exit()
-        if float(z) < float(y) or float(y) > float(z):
-            print("Error: Enter an start time that is smaller than the end time or an end time that "
-                  "is greater than the start time")
-        beat_info = check_for_peak(float(y), float(z), fs, threshold, time, slope)
-    except ValueError:
-        print("Error: Enter a Numeric Value")
-        sys.exit()
-    beat_time = beat_info[0]
-    beat_count = beat_info[1]
+    print(avg_slope)
+    print(std_slope)
+    print(max(slope))
+    print(abs(min(slope)))
+    if math.isnan(std_slope):
+        threshold = max(slope) * .8
+
+    elif max(slope) / std_slope > 8.5:
+        threshold = std_slope * 2
+
+    else:
+        threshold = avg_slope + (4 * std_slope)
+    print(threshold)
+
+   # try:
+    #    print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
+     #         , ":")
+      #  y = input()
+       # print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
+        #      ":")
+        #z = input()
+        #if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
+        #    print("Error: Enter start and end values with the allowed range ")
+        #    sys.exit()
+        #if float(z) < float(y) or float(y) > float(z):
+        #    print("Error: Enter an start time that is smaller than the end time or an end time that "
+        #          "is greater than the start time")
+       # beat_time = check_for_peak(float(y), float(z), fs, threshold, time, slope)
+    #except ValueError:
+    #    print("Error: Enter a Numeric Value")
+      #  sys.exit()
+
+    beat_time = check_for_peak(0, duration, fs, threshold, time, slope)
+    beat_count = length_stupid_method(beat_time)
     avg_bpm = calc_avg_heartrate(beat_time)
     dict = make_dict(avg_bpm, ext_volt, duration, beat_count, beat_time)
     write_json(dict)
@@ -64,7 +92,8 @@ def read_my_file(filename):
         with open(filename, encoding='utf-8-sig') as csvDataFile:
             csvReader = csv.reader(csvDataFile)
             for row in csvReader:
-                if row[0] != '' and float(row[0]) >= 0 and row[1] != '':
+                if row[0] != '' and row[0] != 'bad data' and float(row[0]) >= 0 and row[1] != '' and \
+                        row[1] != 'bad data':
                     time.append(float(row[0]))
                     voltage.append(float(row[1]))
 
@@ -72,7 +101,7 @@ def read_my_file(filename):
 
     except FileNotFoundError:
         print("Err... File not found")
-        sys.exit()
+
 
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -113,7 +142,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
     return y
 
 
-def min_max(array):
+def min_stupid_method(array):
     """
         Finds the min and max values in the input array
     :param : float array
@@ -123,10 +152,17 @@ def min_max(array):
             element is the max.
     """
     extreme1 = (min(array))
-    extreme2 = (max(array))
-    extremes = (extreme1, extreme2)
-    return extremes
+    return extreme1
 
+
+def max_stupid_method(array):
+    extreme2 = (max(array))
+    return extreme2
+
+
+def subtract_stupid_method(min, max):
+    duration = max - min
+    return duration
 
 def diff_signal(array1, array2):
     """
@@ -191,7 +227,6 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
         beats in the given time frame
     """
     beat_time = []
-    beat_count = 0
     current_time = 0
     start_index = 0
     end_index = 0
@@ -200,13 +235,30 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
             start_index = x
         if (end - (1 / fs)) <= array1[x] <= (end + (1 / fs)):
             end_index = x
-    for x in range(start_index, end_index):
-        if abs(array2[x]) >= threshold and array1[x] >= (current_time + .08):
-            current_time = array1[x]
-            beat_time.append(array1[x])
-            beat_count = beat_count + 1
-    return beat_time, beat_count
 
+    if max(array2) / get_std(array2) > 8.5:
+        threshold = get_std(array2) * 2
+        for x in range(start_index, end_index):
+            if abs(array2[x]) >= threshold and (array1[x] >= (current_time + .5) or array1[x] == 0):
+                current_time = array1[x]
+                beat_time.append(array1[x])
+
+    elif abs(min(array2)) > max(array2):
+        for x in range(start_index, end_index):
+            if abs(array2[x]) >= threshold and (array1[x] >= (current_time + .1) or array1[x] == 0):
+                current_time = array1[x]
+                beat_time.append(array1[x])
+    else:
+        for x in range(start_index, end_index):
+            if array2[x] >= threshold and (array1[x] >= (current_time + .1) or array1[x] == 0):
+                current_time = array1[x]
+                beat_time.append(array1[x])
+    return beat_time
+
+
+def length_stupid_method(array):
+    beat_count = len(array)
+    return beat_count
 
 def calc_avg_heartrate(array):
     """

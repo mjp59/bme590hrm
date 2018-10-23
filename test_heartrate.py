@@ -1,12 +1,17 @@
 from heartrate import read_my_file
 from heartrate import butter_lowpass
 from heartrate import butter_lowpass_filter
-from heartrate import min_max
 from heartrate import diff_signal
 from heartrate import take_avg
 from heartrate import check_for_peak
+from heartrate import min_stupid_method
+from heartrate import max_stupid_method
+from heartrate import subtract_stupid_method
+from heartrate import length_stupid_method
+from heartrate import get_std
 import pytest
 import numpy as np
+import math
 
 
 @pytest.mark.parametrize("candidate,expected", [
@@ -83,19 +88,6 @@ def test_butter_lowpass_filter(data, cutoff, fs, order, expected):
     assert np.allclose(response, expected)
 
 
-@pytest.mark.parametrize("candidate,expected", [
-    ([0, 1, 3], (0, 3)),
-    ([-1, 2, 5], (-1, 5)),
-
-
-
-])
-def test_min_max(candidate, expected):
-    response = min_max(candidate)
-    assert response[0] == expected[0]
-    assert response[1] == expected[1]
-
-
 @pytest.mark.parametrize("array1, array2, expected", [
     ([0, 1, 3], [0, 1, 3], (1, 1)),
     ([0, 2, 4], [0, 4, 8], (2, 2))
@@ -128,8 +120,76 @@ def test_take_avg(array, expected):
 
 
 
+
 ])
 def test_check_for_peak(start, end, fs, thres, array1, array2, expected):
     response = check_for_peak(start, end, fs, thres, array1, array2)
     assert response[0] == expected[0]
-    assert response[1] == expected[1]
+
+
+for x in range(1, 33):
+    c = "test_data"
+    d = str(x) + '.csv'
+    e = c + d
+    time_volt = read_my_file(e)
+    time = time_volt[0]
+    volt = time_volt[1]
+    fs = 1 / (time[1] - time[0])
+    filtered_volt = butter_lowpass_filter(volt, 20.0, fs, 6)
+    ext_volt = (min_stupid_method(volt), max_stupid_method(volt))
+    duration = subtract_stupid_method(min_stupid_method(time), max_stupid_method(time))
+    slope = diff_signal(time, filtered_volt)
+    avg_slope = take_avg(slope)
+    std_slope = get_std(slope)
+    if math.isnan(std_slope):
+        threshold = max(slope) * .8
+
+    elif max(slope) / std_slope > 8.5:
+        threshold = std_slope * 2
+
+    else:
+        threshold = avg_slope + (4 * std_slope)
+    a = 'beat_time'
+    b = str(x)
+    globals()[a + b] = check_for_peak(0, duration, fs, threshold, time, slope)
+
+
+@pytest.mark.parametrize("array, expected", [
+    (beat_time1, 34),
+    (beat_time2, 32),
+    (beat_time3, 34),
+    (beat_time4, 32),
+    (beat_time5, 34),
+    (beat_time6, 38),
+    (beat_time7, 31),
+    (beat_time8, 32),
+    (beat_time9, 28),
+    (beat_time10, 44),
+    (beat_time11, 32),
+    (beat_time12, 9),
+
+    (beat_time13, 3),
+    (beat_time14, 14),
+    (beat_time15, 7),
+    (beat_time16, 19),
+    (beat_time17, 19),
+    (beat_time18, 19),
+    (beat_time19, 19),
+    (beat_time20, 19),
+    (beat_time21, 19),
+    (beat_time22, 37),
+    (beat_time23, 75),
+    (beat_time24, 77),
+
+    (beat_time25, 30),
+    (beat_time26, 38),
+    (beat_time27, 62),
+    (beat_time28, 1),
+    (beat_time29, 9),
+    (beat_time30, 77),
+    (beat_time31, 19),
+    (beat_time32, 19),
+])
+def test_length_stupid_method(array, expected):
+    response = length_stupid_method(array)
+    assert response == expected
