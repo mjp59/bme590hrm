@@ -114,9 +114,9 @@ def test_take_avg(array, expected):
 
 
 @pytest.mark.parametrize("start, end, fs, thres, array1, array2, expected", [
-    (0, 10, 1, 5, [0, 2, 4, 6, 8, 10, 12], [0, 4, 4.9, 5, 5.1, 10], ([6, 8, 10], 3)),
-    (0, 10, 1, 5, [0, 2, 4, 6, 8, 10, 12], [0, 4, 4.9, 4.9999, 0, 0, 0], ([], 0)),
-    (0, 10, 1, 5, [0, 2, 4, 6, 8, 10], [7, 5, 7, 8, 10, 12], ([0, 2, 4, 6, 8, 10], 6)),
+    (0, 10, 7/12, 5, [0, 2, 4, 6, 8, 9, 12], [0, 4, 4.9, 5, 5.1, 8, 12], [6, 8]),
+    (0, 10, 7/12, 5, [0, 2, 4, 6, 8, 9, 12], [0, 4, 4.9, 4.9999, 0, 0, 0], []),
+    (0, 10, 2/3, 5, [0, 2, 4, 6, 8, 9], [7, 5, 7, 8, 3, 2], [0, 2, 4, 6]),
 
 
 
@@ -124,7 +124,7 @@ def test_take_avg(array, expected):
 ])
 def test_check_for_peak(start, end, fs, thres, array1, array2, expected):
     response = check_for_peak(start, end, fs, thres, array1, array2)
-    assert response[0] == expected[0]
+    assert response == expected
 
 
 for x in range(1, 33):

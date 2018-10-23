@@ -26,16 +26,6 @@ def main():
     ext_volt = (min_stupid_method(volt), max_stupid_method(volt))
     duration = subtract_stupid_method(min_stupid_method(time), max_stupid_method(time))
     slope = diff_signal(time, filtered_volt)
-
-    plt.plot(time, volt, 'b-', label='data')
-    plt.plot(time, filtered_volt, 'g-', linewidth=2, label='filtered data')
-    plt.xlabel('Time [sec]')
-    plt.grid()
-    plt.legend()
-
-    plt.subplots_adjust(hspace=0.35)
-    plt.show()
-
     avg_slope = take_avg(slope)
     std_slope = get_std(slope)
     print(avg_slope)
