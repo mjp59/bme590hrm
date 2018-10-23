@@ -13,6 +13,7 @@ from heartrate import calc_avg_heartrate
 from heartrate import make_dict
 import pytest
 import numpy as np
+import json
 import math
 
 
@@ -249,3 +250,12 @@ def test_make_dict(mean_bpm, volt_ext, duration, num_beats, beats, expected):
     bpm = response.get('Mean_hr_bpm')
     assert bpm == expected
 
+
+@pytest.mark.parametrize("file", [
+    "metrics.txt",
+])
+def test_write_json(file):
+    with open(file) as f:
+        data = json.load(f)
+        x = "Mean_hr_bpm" in data
+        assert x
