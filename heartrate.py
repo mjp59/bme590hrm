@@ -49,7 +49,8 @@ def main():
             sys.exit()
         if float(z) < float(y) or float(y) > float(z):
             print("Error: Enter an start time that is smaller than the "
-                  "end time or an end time that " "is greater than the start time")
+                  "end time or an end time that " "is "
+                  "greater than the start time")
             logging.error('Ending time outside alloweable range')
             sys.exit()
         beat_time = check_for_peak(float(y), float(z), fs, threshold,
@@ -81,8 +82,8 @@ def read_my_file(filename):
         with open(filename, encoding='utf-8-sig') as csvDataFile:
             wow = csv.reader(csvDataFile)
             for row in wow:
-                if row[0] != '' and row[0] != 'bad data' and float(row[0]) >= 0 \
-                        and row[1] != '' and \
+                if row[0] != '' and row[0] != 'bad data' \
+                        and float(row[0]) >= 0 and row[1] != '' and \
                         row[1] != 'bad data':
                     time.append(float(row[0]))
                     voltage.append(float(row[1]))
