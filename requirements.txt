@@ -3,3 +3,9 @@ pytest-cov
 pytest-pep8
 numpy
 scipy
+csv
+math
+statistics
+logging
+json
+sys
