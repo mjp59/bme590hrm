@@ -48,12 +48,15 @@ def main():
         z = input()
         if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
             print("Error: Enter start and end values with the allowed range ")
+            logging.error('Starting time outside alloweable range')
             sys.exit()
         if float(z) < float(y) or float(y) > float(z):
             print("Error: Enter an start time that is smaller than the end time or an end time that "
                   "is greater than the start time")
+            logging.error('Ending time outside alloweable range')
         beat_time = check_for_peak(float(y), float(z), fs, threshold, time, slope)
     except ValueError:
+        logging.error('Did not give a numeric value for time range')
         print("Error: Enter a Numeric Value")
         sys.exit()
 
@@ -87,6 +90,8 @@ def read_my_file(filename):
 
     except FileNotFoundError:
         print("Err... File not found")
+        logging.error('File not found in the directory')
+        sys.exit()
 
 
 
