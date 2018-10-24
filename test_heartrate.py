@@ -41,8 +41,8 @@ def test_read_my_file(candidate):
 
 
 @pytest.mark.parametrize("cutoff, fs, order,expected", [
-    (3.667, 30, 6, ([0.00094045, 0.00564271, 0.01410677, 0.01880902, 0.01410677,
-                     0.00564271, 0.00094045],
+    (3.667, 30, 6, ([0.00094045, 0.00564271, 0.01410677, 0.01880902,
+                     0.01410677, 0.00564271, 0.00094045],
                     [1., -3.04492596, 4.28973778, -3.42146954,
                      1.60826347, -0.41810886, 0.04669197])),
 
@@ -272,14 +272,13 @@ def test_calc_avg_heartrate(array, expected):
     assert response == expected
 
 
-@pytest.mark.parametrize("mean_bpm, volt_ext, duration,"
-                         " num_beats, beats, expected", [
+@pytest.mark.parametrize("mean_bpm, volt_ext, duration, num_beats, beats, r", [
     (60, (0, 60), 10, 5, [0, 1, 2, 3, 4], 60),
 ])
-def test_make_dict(mean_bpm, volt_ext, duration, num_beats, beats, expected):
+def test_make_dict(mean_bpm, volt_ext, duration, num_beats, beats, r):
     response = make_dict(mean_bpm, volt_ext, duration, num_beats, beats)
     bpm = response.get('Mean_hr_bpm')
-    assert bpm == expected
+    assert bpm == r
 
 
 @pytest.mark.parametrize("file", [
