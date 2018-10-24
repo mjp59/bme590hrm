@@ -1,17 +1,11 @@
-import matplotlib
 import csv
-import numpy as np
 import math
-import scipy
-from scipy.signal import butter, lfilter, freqz
+from scipy.signal import butter, lfilter
 from numpy import diff
 import statistics
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
 import logging
 import json
 import sys
-
 
 
 def main():
@@ -40,11 +34,11 @@ def main():
         threshold = avg_slope + (4 * std_slope)
 
     try:
-        print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
-              , ":")
+        print("Enter the start time for average heart rate calculation (must be 0 or greater and less than "
+              + str(duration), ":")
         y = input()
-        print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
-              ":")
+        print("Enter the end time for average heart rate calculation (must be 0 or greater and less than "
+              + str(duration), ":")
         z = input()
         if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
             print("Error: Enter start and end values with the allowed range ")
@@ -54,6 +48,7 @@ def main():
             print("Error: Enter an start time that is smaller than the end time or an end time that "
                   "is greater than the start time")
             logging.error('Ending time outside alloweable range')
+            sys.exit()
         beat_time = check_for_peak(float(y), float(z), fs, threshold, time, slope)
     except ValueError:
         logging.error('Did not give a numeric value for time range')
@@ -62,8 +57,8 @@ def main():
 
     beat_count = length_stupid_method(beat_time)
     avg_bpm = calc_avg_heartrate(beat_time)
-    dict = make_dict(avg_bpm, ext_volt, duration, beat_count, beat_time)
-    write_json(dict)
+    dict1 = make_dict(avg_bpm, ext_volt, duration, beat_count, beat_time)
+    write_json(dict1)
 
 
 def read_my_file(filename):
@@ -79,8 +74,8 @@ def read_my_file(filename):
     voltage = []
     try:
         with open(filename, encoding='utf-8-sig') as csvDataFile:
-            csvReader = csv.reader(csvDataFile)
-            for row in csvReader:
+            wow = csv.reader(csvDataFile)
+            for row in wow:
                 if row[0] != '' and row[0] != 'bad data' and float(row[0]) >= 0 and row[1] != '' and \
                         row[1] != 'bad data':
                     time.append(float(row[0]))
@@ -92,7 +87,6 @@ def read_my_file(filename):
         print("Err... File not found")
         logging.error('File not found in the directory')
         sys.exit()
-
 
 
 def butter_lowpass(cutoff, fs, order=5):
@@ -135,25 +129,41 @@ def butter_lowpass_filter(data, cutoff, fs, order=5):
 
 def min_stupid_method(array):
     """
-        Finds the min and max values in the input array
+        Finds the min value in the input array
     :param : float array
             Array of multiple numeric values
-    :return: tuple
-            Returns a tuple containing min and max of the array. First element of the tuple is the min and the second
-            element is the max.
+    :return: float
+            Returns a float that is the min of the array
     """
     extreme1 = (min(array))
     return extreme1
 
 
 def max_stupid_method(array):
+    """
+        Finds the max value in the input array
+    :param : float array
+                Array of multiple numeric values
+    :return: float
+                Returns a float that is the max of the array
+    """
     extreme2 = (max(array))
     return extreme2
 
 
-def subtract_stupid_method(min, max):
-    duration = max - min
+def subtract_stupid_method(min1, max1):
+    """
+
+    :param min1: float
+        Float that is min value of signal
+    :param max1: float
+        Float that is max value of signal
+    :return: float
+        Returns a float that is max-min
+    """
+    duration = max1 - min1
     return duration
+
 
 def diff_signal(array1, array2):
     """
@@ -213,9 +223,8 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
         Array of numeric values that are the times which the signal was sampled
     :param array2: float array
         Array of numeric values that are the value of the signal at that time
-    :return: float array, integer
-        Returns a array of the times that the peaks/ beats occur. Also returns an integer that represents the number of
-        beats in the given time frame
+    :return: float array
+        Returns a array of the times that the peaks/ beats occur.
     """
     beat_time = []
     current_time = 0
@@ -248,8 +257,16 @@ def check_for_peak(start, end, fs, threshold, array1, array2):
 
 
 def length_stupid_method(array):
+    """
+        Takes the length of an array/list
+    :param array: float array
+        Array of where the beats occur
+    :return: interger
+        Number of that is integer that is equal to the length of the array
+    """
     beat_count = len(array)
     return beat_count
+
 
 def calc_avg_heartrate(array):
     """
@@ -288,26 +305,25 @@ def make_dict(mean_bpm, volt_ext, duration, num_beats, beats):
     :return: dictionary
         returns a dictionary of the important metrics from the signal data
     """
-    dict = {
+    dict1 = {
         "Mean_hr_bpm": mean_bpm,
         "voltage_extremes": volt_ext,
         "duration": duration,
         "num_beats": num_beats,
         "beats": beats
     }
-    return dict
+    return dict1
 
 
-def write_json(dict):
+def write_json(dict1):
     """
         Writes the input dictionary to a text file using json
-    :param dict: dictionary
+    :param dict1: dictionary
         Dictionary with all the important metrics for the data signal. Dict is writing a file named metrics.txt
     """
     with open('metrics.txt', 'w') as outfile:
-        json.dump(dict, outfile, indent = 2)
+        json.dump(dict1, outfile, indent=2)
 
 
 if __name__ == "__main__":
     main()
-
