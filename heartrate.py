@@ -8,6 +8,7 @@ from numpy import diff
 import statistics
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
+import logging
 import json
 import sys
 
@@ -15,7 +16,9 @@ import sys
 
 def main():
     x = sys.argv[-1]
+    logging.basicConfig(filename='heartrate.log', level=logging.DEBUG)
     if x == 'heartrate.py':
+        logging.warning('Taking user input high risk for invalid file')
         print('Enter the filename:')
         x = input()
     time_volt = read_my_file(x)
@@ -28,39 +31,32 @@ def main():
     slope = diff_signal(time, filtered_volt)
     avg_slope = take_avg(slope)
     std_slope = get_std(slope)
-    print(avg_slope)
-    print(std_slope)
-    print(max(slope))
-    print(abs(min(slope)))
     if math.isnan(std_slope):
         threshold = max(slope) * .8
 
     elif max(slope) / std_slope > 8.5:
         threshold = std_slope * 2
-
     else:
         threshold = avg_slope + (4 * std_slope)
-    print(threshold)
 
-   # try:
-    #    print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
-     #         , ":")
-      #  y = input()
-       # print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
-        #      ":")
-        #z = input()
-        #if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
-        #    print("Error: Enter start and end values with the allowed range ")
-        #    sys.exit()
-        #if float(z) < float(y) or float(y) > float(z):
-        #    print("Error: Enter an start time that is smaller than the end time or an end time that "
-        #          "is greater than the start time")
-       # beat_time = check_for_peak(float(y), float(z), fs, threshold, time, slope)
-    #except ValueError:
-    #    print("Error: Enter a Numeric Value")
-      #  sys.exit()
+    try:
+        print("Enter the start time for average heart rate calculation (must be 0 or greater and less than " + str(duration)
+              , ":")
+        y = input()
+        print("Enter the end time for average heart rate calculation (must be 0 or greater and less than " + str(duration),
+              ":")
+        z = input()
+        if float(y) > duration or float(y) < 0 or float(z) > duration or float(z) < 0:
+            print("Error: Enter start and end values with the allowed range ")
+            sys.exit()
+        if float(z) < float(y) or float(y) > float(z):
+            print("Error: Enter an start time that is smaller than the end time or an end time that "
+                  "is greater than the start time")
+        beat_time = check_for_peak(float(y), float(z), fs, threshold, time, slope)
+    except ValueError:
+        print("Error: Enter a Numeric Value")
+        sys.exit()
 
-    beat_time = check_for_peak(0, duration, fs, threshold, time, slope)
     beat_count = length_stupid_method(beat_time)
     avg_bpm = calc_avg_heartrate(beat_time)
     dict = make_dict(avg_bpm, ext_volt, duration, beat_count, beat_time)
