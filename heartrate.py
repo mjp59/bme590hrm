@@ -55,6 +55,8 @@ def main():
             sys.exit()
         beat_time = check_for_peak(float(y), float(z), fs, threshold,
                                    time, slope)
+        all_time = check_for_peak(0, duration , fs, threshold,
+                                   time, slope)
     except ValueError:
         logging.error('Did not give a numeric value for time range')
         print("Error: Enter a Numeric Value")
@@ -62,7 +64,7 @@ def main():
 
     beat_count = length_stupid_method(beat_time)
     avg_bpm = calc_avg_heartrate(beat_time)
-    dict1 = make_dict(avg_bpm, ext_volt, duration, beat_count, beat_time)
+    dict1 = make_dict(avg_bpm, ext_volt, duration, beat_count, all_time)
     write_json(dict1)
 
 
