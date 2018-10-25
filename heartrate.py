@@ -90,9 +90,10 @@ def read_my_file(filename):
 
         return time, voltage
 
-    except FileNotFoundError:
+    except FileNotFoundError as err:
         print("Err... File not found")
         logging.error('File not found in the directory')
+        raise err
         sys.exit()
 
 

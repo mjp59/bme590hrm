@@ -37,7 +37,8 @@ def test_read_my_file(candidate, expected):
 def test_read_my_file(candidate):
     with pytest.raises(FileNotFoundError) as excinfo:
         read_my_file(candidate)
-    assert str(excinfo.value) == 'Err... File not found'
+        print(str(excinfo.value))
+    assert str(excinfo.value) == "[Errno 2] No such file or directory: 'what'"
 
 
 @pytest.mark.parametrize("cutoff, fs, order,expected", [
