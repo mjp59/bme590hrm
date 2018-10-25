@@ -10,6 +10,8 @@ The current developed program is written in python 3.7. The main to activate the
 		The program will handle errors and expectations by catching the error, printing a error message, raising the error, and then exiting the program with an exit code of 0 (sys.exit).
 		
 BONUS: The program is known to work for 25 out of the 32 data files. Test_data files 6, 11, 14, 24, 26, 27, and 28 are not working properly and do not return the correct number of beats in the file. The number of beats were determined by using matlibplot to plot the signals from each data file and manually counting the number of beats. This allowed for accurate testing of the data files by testing the program for the number beats in the signal. Odds are if the program counts the number of manually counted beats that they are where the beats/peaks occur. Plus the peak finding algorthim changes depending on key values of the data set. This allows the program to correctly calculate values for data sets were the patient has wellens diease. The modification of the algorthim is that the abs value of the differential array is taken to make high negative voltage a positive voltage that can be detected by the thresholding. Multiple ways to input filename.  
+
+Note: 
 		
 MIT License
 
