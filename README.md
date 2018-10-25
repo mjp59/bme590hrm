@@ -8,6 +8,8 @@ The current developed program is written in python 3.7. The main to activate the
 		The program will then use the time location of the peaks to calculate the average heart rate over the user window. It will return this value along with the extreme voltages, time of the peaks, the duration of the signal, and the number of peaks/beats in a dictionary. This dictionary will then be output as a json with the name metrics.txt. This file will be updated everytime the programs runs. 
 		The program will handle errors and expectations by catching the error, printing a error message, raising the error, and then exiting the program with an exit code of 0 (sys.exit).
 		
+BONUS: The program is known to work for 25 out of the 32 data files. Test_data files 6, 11, 14, 24, 26, 27, and 28 are not working properly and do not return the correct number of beats in the file. The number of beats were determined by using matlibplot to plot the signals from each data file and manually counting the number of beats. This allowed for accurate testing of the data files by testing the program for the number beats in the signal. Odds are if the program counts the number of manually counted beats that they are where the beats/peaks occur. 
+		
 MIT License
 
 Copyright (c) [2018] [Michael Postiglione]
